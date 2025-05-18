@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev":"nodemon Backend/index.js",
+    "dev": "nodemon Backend/index.js",
     "start": "node Backend/index.js"
   },
   "repository": {
@@ -20,7 +20,9 @@
   "homepage": "https://github.com/sardarwaliamiri1/Full-Stack#readme",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "mongoose": "^8.15.0",
     "nodemon": "^3.1.10"
   }
 }
