@@ -1,23 +1,135 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { Link, useNavigate} from 'react-router-dom'
 
-export default function Signup() {
+function SignUpForm() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+  const naviGate= useNavigate();
+  const [errors, setErrors] = useState({});
+  const [Submitbtn, setSubmitBtn] = useState('Submit');
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+   
+   // setFormData(prev=>({...prev,  [name]: value }));
+    setFormData(prev => ({ ...prev, [e.target.name] : e.target.value }));
+                                                                                                                                                       
+
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name) newErrors.name = "Name is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    return newErrors;
+  };
+ 
+
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    setSubmitBtn('Submitting...');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      const res= await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }, 
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      console.log(data);
+      setErrors({});
+      if (data.success === false) {
+        alert(data.message);
+        setSubmitBtn('Submit');
+      }
+      else{
+      setSubmitBtn('Submit');
+      setFormData({
+        name: '',
+        email: '',
+        password: ''
+      
+      });
+      naviGate('/Sign-In')
+    }
+    }
+  };
+
   return (
     <>
-    <h1 className='text-center text-3xl my-2 '>Sign Up</h1>
-    <div className="flex justify-center">
-    <div className='flex justify-center items-center my-10 border-2 border-slate-900 rounded-md p-4 w-80 ml-'>
-      <form action="post">
-        <div className='flex flex-col gap-2'>
-          <input type="text" placeholder='Enter your name' className='border-2 border-slate-400 rounded-md p-2'/>
-          <input type="email" placeholder='Enter your email' className='border-2 border-slate-400 rounded-md p-2'/>
-          <input type="password" placeholder='Enter your password' className='border-2 border-slate-400 rounded-md p-2'/>
-          <input type="password" placeholder='Confirm your password' className='border-2 border-slate-400 rounded-md p-2'/>
-          <button className='bg-fuchsia-500 p-2 rounded-md'>Sign Up</button>
-        </div>
-       
-      </form>
-    </div>
-    </div>
+    <form 
+      onSubmit={handleSubmit}
+      className="bg-white p-6 rounded shadow-md w-full max-w-md mx-auto"
+    >
+      <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Name</label>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Email</label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+      </div>
+
+      <div className="mb-6">
+        <label className="block mb-1 font-medium">Password</label>
+        <input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+      </div>
+
+      <button
+          type="submit"
+          className={`w-full ${
+            Submitbtn === "submiting..." ? "bg-red-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+          } text-white font-semibold py-2 px-4 rounded`}
+          disabled={Submitbtn === "submiting..."}
+        >
+          {Submitbtn}
+</button>
+    </form>
+    
+    <Link to="/sign-in" className='  flex gap-4'>
+    <p > have an account</p>
+      <span className='text-blue-600 hover:underline'>Sing In</span>
+
+    </Link>
     </>
-  )
+    
+  );
 }
+
+export default SignUpForm;

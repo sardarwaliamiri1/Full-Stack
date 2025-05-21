@@ -17,7 +17,7 @@ app.listen(process.env.PORT||3000, ()=> {
       })
 
 app.use('/user', UserRoter);
-app.use('/auth', AuthRoter);
+app.use('/api/auth', AuthRoter);
 app.use((err,req, res, next) => {
      const message= err.message || 'Internal Server Error'
      const statuscode= err.status || 500;
