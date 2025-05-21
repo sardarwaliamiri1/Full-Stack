@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate} from 'react-router-dom'
 
 function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -8,8 +8,9 @@ function SignUpForm() {
   });
 
   const [errors, setErrors] = useState({});
-  const [Submitbtn, setSubmitBtn] = useState('Submit');
-
+  const [Submitbtn, setSubmitBtn] = useState('Sign In');
+ const [serverError, setServerError] = useState({});
+  const naviGate= useNavigate();
   const handleChange = (e) => {
     const { name, value } = e.target;
    
@@ -21,66 +22,81 @@ function SignUpForm() {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
+    } 
     return newErrors;
   };
  
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    setSubmitBtn('Submitting...');
+    setSubmitBtn('Signing In...');
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      setErrors({});
+      const res= await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }, 
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      console.log(data);
+
+      if (data.success === false) {
+        alert(data.message);
+        setServerError(data.message);
+      
+      }
+
+      else{setErrors({});
       console.log("Form submitted:", formData);
-      alert("Successfully signed up!");
-      setSubmitBtn('Submit');
+      alert("Successfully signed in!");
+      setSubmitBtn('Sign In');
       setFormData({
         name: '',
         email: '',
         password: ''
       });
+      naviGate('/')}
+
+      
     }
   };
 
   return (
-    <>
+    <div className='flex flex-col items-center justify-center h-screen bg-gray-100'>
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 rounded shadow-md w-full max-w-md mx-auto"
+      className="bg-white p-6 rounded shadow-md w-full mt-6 max-w-md mx-auto"
     >
       <h2 className="text-2xl font-bold mb-4 text-center">Sign In</h2>
 
       
 
       <div className="mb-4">
-        <label className="block mb-1 font-medium">Email</label>
-        <input
+        
+        <input placeholder='Email'
           type="email"
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded-lg border-gray-300  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" 
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
       </div>
 
       <div className="mb-6">
-        <label className="block mb-1 font-medium">Password</label>
-        <input
+        <input placeholder='Password'
           type="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded-lg border-gray-300  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
       </div>
@@ -96,8 +112,8 @@ function SignUpForm() {
 </button>
     </form>
     
-
-    </>
+    {serverError && <p className="text-red-500 text-sm mt-1">{serverError}</p>}
+    </div>
     
   );
 }

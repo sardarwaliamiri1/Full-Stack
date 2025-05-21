@@ -69,6 +69,7 @@ function SignUpForm() {
 
   return (
     <>
+    <div className='flex flex-col items-center justify-center h-screen bg-gray-100'>
     <form 
       onSubmit={handleSubmit}
       className="bg-white p-6 rounded shadow-md w-full max-w-md mx-auto"
@@ -127,6 +128,7 @@ function SignUpForm() {
       <span className='text-blue-600 hover:underline'>Sing In</span>
 
     </Link>
+    </div>
     </>
     
   );
