@@ -1,3 +1,4 @@
+import { time } from "console";
 import { Schema ,model} from "mongoose";
 import { type } from "os";
 const userSchema = new Schema({
@@ -18,7 +19,7 @@ const userSchema = new Schema({
             trim: true
       },
 
-})
+}, {timestamps: true});
 
 const User = model('User', userSchema);
 export default User;

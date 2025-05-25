@@ -38,6 +38,7 @@ export const signin= async (req,res,next)=>{
       if(!isPasswordValid) return next(errorHandler('Invalid credentials', 404));
       //console.log(process.env.JWT_SECRET);
       const token=jwt.sign({id:validUser._id}, process.env.JWT_SECRET, {expiresIn: '1d'});
+      const { password: pwd, ...userWithoutPassword } = validUser._doc
       res.cookie('access_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -45,11 +46,8 @@ export const signin= async (req,res,next)=>{
       }).status(200).json({
             success: true,
             message: 'Login successful',
-            user: {
-                  
-                  name: validUser.name,
-                  email: validUser.email,
-            },
+            userWithoutPassword
+            
             
       })
       

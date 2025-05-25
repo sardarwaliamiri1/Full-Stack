@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate} from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import {loginStart, loginFailure,loginSuccess} from '../redux/user.js'
+import { set } from 'mongoose';
 
 function SignUpForm() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-
+  const{serverSideError, isSubmitting}= useSelector(state=>(state.user));
   const [errors, setErrors] = useState({});
-  const [Submitbtn, setSubmitBtn] = useState('Sign In');
- const [serverError, setServerError] = useState({});
+  //const [isSubmitting, setIsSubmitting] = useState(false);
+ // const [Submitbtn, setSubmitBtn] = useState('Sign In');
+  const [serverError, setServerError] = useState();
+  const dispatch = useDispatch();
   const naviGate= useNavigate();
+  const data={}
   const handleChange = (e) => {
     const { name, value } = e.target;
    
@@ -32,44 +38,57 @@ function SignUpForm() {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    setSubmitBtn('Signing In...');
+    dispatch(loginStart());
+    //setIsSubmitting(true);
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      const res= await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }, 
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      console.log(data);
+          try{
+          const res= await fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }, 
+            body: JSON.stringify(formData),
+          });
+          const data = await res.json();
+          console.log(`this is data response ${data.message}`);
+          
+          if (data.success) {
+          dispatch(loginSuccess(data));
+          setFormData({
+            name: '',
+            email: '',
+            password: ''
+          })
+          naviGate('/')
+        }
 
-      if (data.success === false) {
-        alert(data.message);
-        setServerError(data.message);
-      
+        else{
+
+        dispatch(loginFailure(data.message));
+        console.log(`this is after data failer ${data.message}`);
+        
+        //setServerError(data.message) 
+        
+        }
+
+
+          }
+        catch{
+        dispatch(loginFailure("Server Error conection error"));
+        //setServerError('Server Error conection error') 
       }
 
-      else{setErrors({});
-      console.log("Form submitted:", formData);
-      alert("Successfully signed in!");
-      setSubmitBtn('Sign In');
-      setFormData({
-        name: '',
-        email: '',
-        password: ''
-      });
-      naviGate('/')}
+     
 
       
     }
   };
 
   return (
-    <div className='flex flex-col items-center justify-center h-screen bg-gray-100'>
+    <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100'>
     <form
       onSubmit={handleSubmit}
       className="bg-white p-6 rounded shadow-md w-full mt-6 max-w-md mx-auto"
@@ -104,15 +123,17 @@ function SignUpForm() {
       <button
           type="submit"
           className={`w-full ${
-            Submitbtn === "submiting..." ? "bg-red-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+            "bg-blue-500 hover:bg-blue-600"
           } text-white font-semibold py-2 px-4 rounded`}
-          disabled={Submitbtn === "submiting..."}
+          disabled={isSubmitting}
         >
-          {Submitbtn}
+          {isSubmitting? "Signing In..." : "Sign In"}
 </button>
     </form>
+    {serverSideError.length > 0 && <p className="text-red-500 text-lg mt-1">{serverSideError}</p>}
     
-    {serverError && <p className="text-red-500 text-sm mt-1">{serverError}</p>}
+    
+   
     </div>
     
   );
