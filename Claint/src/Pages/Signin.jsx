@@ -3,6 +3,7 @@ import { Link, useNavigate} from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import {loginStart, loginFailure,loginSuccess} from '../redux/user.js'
 import { set } from 'mongoose';
+import SignInwithGoogle from '../Components/SignInwithGoogle.jsx';
 
 function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -56,7 +57,7 @@ function SignUpForm() {
           console.log(`this is data response ${data.message}`);
           
           if (data.success) {
-          dispatch(loginSuccess(data));
+          dispatch(loginSuccess(data.userWithoutPassword));
           setFormData({
             name: '',
             email: '',
@@ -122,15 +123,17 @@ function SignUpForm() {
 
       <button
           type="submit"
-          className={`w-full ${
+          className={`w-full hover:opacity-40 ${
             "bg-blue-500 hover:bg-blue-600"
-          } text-white font-semibold py-2 px-4 rounded`}
+          } text-white font-semibold py-3 px-4 rounded`}
           disabled={isSubmitting}
         >
           {isSubmitting? "Signing In..." : "Sign In"}
 </button>
+          <SignInwithGoogle />
     </form>
-    {serverSideError.length > 0 && <p className="text-red-500 text-lg mt-1">{serverSideError}</p>}
+    {serverSideError && <p className="text-red-500 text-lg mt-1">{serverSideError}</p>}
+
     
     
    

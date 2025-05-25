@@ -3,19 +3,23 @@ import bcryptjs from "bcryptjs";
 import { errorHandler } from "../Utlies/Errorhandler.js";
 import jwt from "jsonwebtoken";
 const signup = async(req, res, next) => {
-      const {name, email, password} = req.body;
+      const {name, email, password, avatar} = req.body;
       const hashedPassword = await bcryptjs.hashSync(password, 10);
       const newUser= new User({
             name,
             email,
             password: hashedPassword,
+            avatar
       })
       
       try {
             const user = await newUser.save();
+            //const rest= await User.findById(user._id).select("-password");
+            const{password: pwd, ...userWithoutPassword } = user._doc;
             return res.status(201).json({
                   message: "User created successfully",
                   success: true,   
+                  userWithoutPassword
 
             
             })

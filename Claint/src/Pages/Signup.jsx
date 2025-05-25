@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate} from 'react-router-dom'
+import SignInwithGoogle from '../Components/SignInwithGoogle';
 
 function SignUpForm() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    avatar:''
   });
   const naviGate= useNavigate();
   const [errors, setErrors] = useState({});
@@ -26,7 +28,11 @@ function SignUpForm() {
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
+    }
+    if (!formData.avatar) {
+      newErrors.avatar = "Avatar link is required"; } 
+    
+    else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
     return newErrors;
@@ -39,6 +45,8 @@ function SignUpForm() {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      setSubmitBtn('Submit');
+      
     } else {
       const res= await fetch('/api/auth/signup', {
         method: 'POST',
@@ -111,16 +119,29 @@ function SignUpForm() {
         />
         {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
       </div>
+      <div className="mb-6">
+        <label className="block mb-1 font-medium">Avatar Link</label>
+        <input
+          type="text"
+          name="avatar"
+          value={formData.avatar}
+          onChange={handleChange}
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        {errors.avatar && <p className="text-red-500 text-sm mt-1">{errors.avatar}</p>}
+      </div>
+      
 
       <button
           type="submit"
-          className={`w-full ${
+          className={`w-full hover:opacity-40 ${
             Submitbtn === "submiting..." ? "bg-red-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
-          } text-white font-semibold py-2 px-4 rounded`}
+          } text-white font-semibold py-3 px-4 rounded`}
           disabled={Submitbtn === "submiting..."}
         >
           {Submitbtn}
 </button>
+      <SignInwithGoogle />
     </form>
     
     <Link to="/sign-in" className='  flex gap-4'>
